@@ -16,7 +16,11 @@ import streamlit as st
 
 # Lire depuis les secrets Streamlit Cloud
 service_account_info = st.secrets["google_service_account"]
+# Ancienne version à remplacer :
+import json
+service_account_info = st.secrets["google_service_account"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
+
 
 client = gspread.authorize(creds)
 
