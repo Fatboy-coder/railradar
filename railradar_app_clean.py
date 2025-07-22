@@ -7,7 +7,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", sco
 client = gspread.authorize(creds)
 
 # Google Sheet ID :
-sheet = client.open_by_key("23234jhfjh45chf43532hch435k4c3h4").sheet1
+sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").sheet1
 
 import streamlit as st
 import pandas as pd
@@ -23,15 +23,6 @@ st.set_page_config(page_title="RailRadar", layout="centered")
 # Initialisation du stockage temporaire
 if 'reports' not in st.session_state:
     st.session_state.reports = []
-
-# Enregistrement dans Google Sheet
-sheet.append_row([
-    now.strftime("%H:%M"),
-    gare.strip().title(),
-    ligne.strip().upper(),
-    type_incident,
-    commentaire.strip()
-])
 
 # === TITRE PRINCIPAL ===
 st.title("RailRadar – Signale les galères, sauve des trajets")
@@ -49,15 +40,26 @@ with st.form("report_form"):
     envoyer = st.form_submit_button("Envoyer le signalement")
 
     if envoyer and gare and ligne:
-        now = datetime.datetime.now(pytz.timezone("Europe/Paris"))
-        st.session_state.reports.append({
-            "heure": now.strftime("%H:%M"),
-            "gare": gare.strip().title(),
-            "ligne": ligne.strip().upper(),
-            "type": type_incident,
-            "commentaire": commentaire.strip()
-        })
-        st.success("Signalement enregistré. Merci !")
+    now = datetime.datetime.now(pytz.timezone("Europe/Paris"))
+
+    st.session_state.reports.append({
+        "heure": now.strftime("%H:%M"),
+        "gare": gare.strip().title(),
+        "ligne": ligne.strip().upper(),
+        "type": type_incident,
+        "commentaire": commentaire.strip()
+    })
+
+    # Enregistrement dans Google Sheets
+    sheet.append_row([
+        now.strftime("%H:%M"),
+        gare.strip().title(),
+        ligne.strip().upper(),
+        type_incident,
+        commentaire.strip()
+    ])
+
+    st.success("Signalement enregistré. Merci !")
 
 # === SECTION : AFFICHAGE DES SIGNALEMENTS ===
 st.header("Derniers signalements")
@@ -102,5 +104,3 @@ st.sidebar.markdown("- Carte interactive des gares signalées")
 st.sidebar.markdown("- Notifications par ligne suivie")
 st.sidebar.markdown("- Connexion API SNCF")
 st.sidebar.markdown("- Système de fiabilité des usagers")
-
-pip install gspread oauth2client
