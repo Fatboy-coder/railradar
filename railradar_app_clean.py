@@ -11,7 +11,13 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # === CONNEXION AU GOOGLE SHEET ===
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+import json
+import streamlit as st
+
+# Lire depuis les secrets Streamlit Cloud
+service_account_info = st.secrets["google_service_account"]
+creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
+
 client = gspread.authorize(creds)
 
 # Remplace l’ID par le tien (dans l’URL de ton Google Sheet)
