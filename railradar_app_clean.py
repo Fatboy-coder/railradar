@@ -1,7 +1,5 @@
 # === RailRadar App ===
 # Une application Streamlit citoyenne pour signaler les retards, fermetures ou perturbations ferroviaires
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
 # Connexion Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -9,13 +7,15 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", sco
 client = gspread.authorize(creds)
 
 # Google Sheet ID :
-sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").sheet1
+sheet = client.open_by_key("23234jhfjh45chf43532hch435k4c3h4").sheet1
 
 import streamlit as st
 import pandas as pd
 import datetime
 import pytz
 import pydeck as pdk
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # === CONFIGURATION DE L'APPLICATION ===
 st.set_page_config(page_title="RailRadar", layout="centered")
@@ -23,6 +23,15 @@ st.set_page_config(page_title="RailRadar", layout="centered")
 # Initialisation du stockage temporaire
 if 'reports' not in st.session_state:
     st.session_state.reports = []
+
+# Enregistrement dans Google Sheet
+sheet.append_row([
+    now.strftime("%H:%M"),
+    gare.strip().title(),
+    ligne.strip().upper(),
+    type_incident,
+    commentaire.strip()
+])
 
 # === TITRE PRINCIPAL ===
 st.title("RailRadar – Signale les galères, sauve des trajets")
