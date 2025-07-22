@@ -1,3 +1,6 @@
 streamlit
 pandas
+pydeck
+gspread
+oauth2client
 pytz
