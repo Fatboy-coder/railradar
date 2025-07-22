@@ -1,5 +1,7 @@
 # === RailRadar App ===
 # Une application Streamlit citoyenne pour signaler les retards, fermetures ou perturbations ferroviaires
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 import streamlit as st
 import pandas as pd
@@ -83,3 +85,5 @@ st.sidebar.markdown("- Carte interactive des gares signalées")
 st.sidebar.markdown("- Notifications par ligne suivie")
 st.sidebar.markdown("- Connexion API SNCF")
 st.sidebar.markdown("- Système de fiabilité des usagers")
+
+pip install gspread oauth2client
