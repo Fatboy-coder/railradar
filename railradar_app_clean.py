@@ -39,7 +39,7 @@ with st.form("report_form"):
     commentaire = st.text_area("Commentaire (optionnel)")
     envoyer = st.form_submit_button("Envoyer le signalement")
 
-    if envoyer and gare and ligne:
+if envoyer and gare and ligne:
     now = datetime.datetime.now(pytz.timezone("Europe/Paris"))
 
     st.session_state.reports.append({
