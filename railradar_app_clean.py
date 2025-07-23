@@ -139,6 +139,7 @@ elif menu == "🗺️ Carte des incidents":
     def get_geojson_fields(geojson):
     feature_props = geojson["features"][0].get("properties", {})
     return [key for key in ["code_ligne", "nom", "mode"] if key in feature_props]
+    st.write(lignes_geojson["features"][0]["properties"])
 
 folium.GeoJson(
     lignes_geojson,
