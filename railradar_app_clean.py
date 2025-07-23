@@ -17,17 +17,28 @@ from streamlit_folium import st_folium
 if st.sidebar.checkbox("Carte des incidents"):
     st.subheader("📍 Visualisation géographique des incidents")
 
-    map_center = [48.8566, 2.3522]  # Coordonnées centrales (Paris par défaut)
+    # Rechargement des données en direct
+    data = sheet.get_all_records()
+
+    map_center = [48.8566, 2.3522]  # Paris
     m = folium.Map(location=map_center, zoom_start=6)
 
-    for row in data:  # "data" est ta liste des événements chargée dans l'app
-        nom_lieu = row.get("ville") or row.get("lieu") or row.get("gare") or row.get("nom_lieu")
+    for row in data:
+        nom_lieu = row.get("gare") or row.get("lieu") or row.get("ville")
         if nom_lieu:
             lat, lon = get_coordinates(nom_lieu)
             if lat and lon:
+                popup = f"""
+                <b>{nom_lieu}</b><br>
+                Ligne : {row.get('ligne')}<br>
+                Type : {row.get('type')}<br>
+                Heure : {row.get('heure')}<br>
+                Commentaire : {row.get('commentaire', '')}
+                """
                 folium.Marker(
                     [lat, lon],
-                    popup=f"{nom_lieu} – {row.get('incident', 'Incident')}"
+                    popup=popup,
+                    icon=folium.Icon(color="red", icon="train", prefix="fa")
                 ).add_to(m)
 
     st_data = st_folium(m, width=700, height=500)
