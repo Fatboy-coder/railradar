@@ -9,6 +9,66 @@ import pydeck as pdk
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
+import requests
+import time
+import folium
+from streamlit_folium import st_folium
+
+if st.sidebar.checkbox("Carte des incidents"):
+    st.subheader("📍 Visualisation géographique des incidents")
+
+    map_center = [48.8566, 2.3522]  # Coordonnées centrales (Paris par défaut)
+    m = folium.Map(location=map_center, zoom_start=6)
+
+    for row in data:  # "data" est ta liste des événements chargée dans l'app
+        nom_lieu = row.get("ville") or row.get("lieu") or row.get("gare") or row.get("nom_lieu")
+        if nom_lieu:
+            lat, lon = get_coordinates(nom_lieu)
+            if lat and lon:
+                folium.Marker(
+                    [lat, lon],
+                    popup=f"{nom_lieu} – {row.get('incident', 'Incident')}"
+                ).add_to(m)
+
+    st_data = st_folium(m, width=700, height=500)
+
+# Connexion à la feuille "cache_geoloc"
+cache_sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").worksheet("cache_geoloc")
+
+# Fonction pour lire le cache
+def read_cache():
+    data = cache_sheet.get_all_records()
+    return {row["nom_lieu"].lower(): (row["latitude"], row["longitude"]) for row in data}
+
+# Fonction pour ajouter une ligne au cache
+def append_to_cache(nom_lieu, lat, lon):
+    cache_sheet.append_row([nom_lieu, lat, lon])
+
+# Fonction de géocodage avec cache
+def get_coordinates(nom_lieu):
+    cache = read_cache()
+    nom_clean = nom_lieu.strip().lower()
+    
+    if nom_clean in cache:
+        return cache[nom_clean]
+    
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        "q": nom_lieu,
+        "format": "json",
+        "limit": 1
+    }
+    headers = {"User-Agent": "railradar-bot"}
+    response = requests.get(url, params=params, headers=headers)
+    time.sleep(1)  # Pause par respect des règles d'usage
+    
+    if response.status_code == 200 and response.json():
+        lat = float(response.json()[0]["lat"])
+        lon = float(response.json()[0]["lon"])
+        append_to_cache(nom_lieu, lat, lon)
+        return lat, lon
+    else:
+        return None, None
 
 # === CONFIGURATION DE LA PAGE (avec logo et PWA) ===
 st.set_page_config(
