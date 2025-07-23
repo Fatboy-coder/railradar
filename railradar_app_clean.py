@@ -12,6 +12,15 @@ import json
 
 import streamlit as st
 
+st.markdown(
+    """
+    <link rel="manifest" href="https://raw.githubusercontent.com/13devlab/railradar-assets/main/manifest.json">
+    <meta name="theme-color" content="#32cd32">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/13devlab/railradar-assets/main/logo-512.png">
+    """,
+    unsafe_allow_html=True
+)
+
 # Optimisation mobile
 st.set_page_config(
     page_title="RailRadar",
