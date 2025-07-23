@@ -14,9 +14,9 @@ import streamlit as st
 
 st.markdown(
     """
-    <link rel="manifest" href="https://raw.githubusercontent.com/13devlab/railradar-assets/main/manifest.json">
+    <link rel="manifest" href="https://github.com/Fatboy-coder/railradar-assets/blob/main/manifest.json">
     <meta name="theme-color" content="#32cd32">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/13devlab/railradar-assets/main/logo-512.png">
+    <link rel="apple-touch-icon" href="https://github.com/Fatboy-coder/railradar-assets/blob/main/logo-512.png">
     """,
     unsafe_allow_html=True
 )
