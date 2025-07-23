@@ -71,6 +71,16 @@ def geocode_with_cache(lieu):
 
     return None, None
 
+with open("emplacement-des-gares-idf.geojson", "r", encoding="utf-8") as f:
+    gares_geojson = json.load(f)
+
+# 🔍 Extraire les noms de gares uniques
+liste_gares = sorted(list({
+    feature["properties"].get("nom_long")
+    for feature in gares_geojson["features"]
+    if feature["properties"].get("nom_long")
+}))
+
 # ⚙️ Configuration Streamlit
 st.set_page_config(page_title="RailRadar", layout="wide")
 st.title("🚆 RailRadar – Signalements collaboratifs")
