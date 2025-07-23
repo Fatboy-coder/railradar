@@ -8,7 +8,7 @@
     "description": "Signale ou consulte les perturbations ferroviaires en temps r\u00e9el.",
     "icons": [
         {
-            "src": "logo-512.png",
+            "src": "logo.png",
             "sizes": "512x512",
             "type": "image/png"
         }
