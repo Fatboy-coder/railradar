@@ -113,6 +113,8 @@ if menu == "📩 Signaler":
         selected_mode = st.selectbox("🚇 Mode de transport", sorted(gares_par_mode.keys()))
         gare_options = sorted(gares_par_mode[selected_mode])
         lieu = st.selectbox("📍 Gare ou station concernée", gare_options)
+gare_options = sorted(gares_par_mode[selected_mode])
+
 
         if lieu in gares_coords:
             lignes = gares_coords[lieu]["lignes"]
