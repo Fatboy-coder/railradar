@@ -79,7 +79,7 @@ if menu == "🗺️ Carte des incidents":
     )
 
     folium.TileLayer(
-        tiles="https://api..com/styles/v1//streets-v11/tiles/{z}/{x}/{y}?access_token=" + st.secrets["pk.eyJ1IjoiMTNkZXZsYWIiLCJhIjoiY21kZzQ4Zmp3MGwxOTJscTNiZnIzc2lldyJ9.7P8rf94P_eDORWkrgp_Ftw"],
+        tiles=f"https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{{z}}/{{x}}/{{y}}?access_token={mapbox_token}" + st.secrets["MAPBOX_TOKEN"],
         attr='Mapbox',
         name='Mapbox Streets',
         overlay=True,
