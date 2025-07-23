@@ -32,6 +32,13 @@ if st.sidebar.checkbox("Carte des incidents"):
 
     st_data = st_folium(m, width=700, height=500)
 
+# === CONNEXION AU GOOGLE SHEET ===
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+service_account_info = st.secrets["google_service_account"]
+creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
+client = gspread.authorize(creds)
+sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").sheet1
+
 # Connexion à la feuille "cache_geoloc"
 cache_sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").worksheet("cache_geoloc")
 
@@ -94,13 +101,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-# === CONNEXION AU GOOGLE SHEET ===
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-service_account_info = st.secrets["google_service_account"]
-creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
-client = gspread.authorize(creds)
-sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").sheet1
 
 # === GESTION SESSION ===
 if 'reports' not in st.session_state:
