@@ -1,0 +1,30 @@
+# Fichiers sensibles et secrets
+credentials.json
+.env
+secrets.toml
+
+# Jetons d'authentification temporaires
+*.pem
+*.p12
+
+# Données utilisateurs ou journaux
+*.log
+*.sqlite3
+*.db
+__pycache__/
+*.pyc
+
+# Dossiers d'exécution
+.venv/
+venv/
+.envrc
+.mypy_cache/
+.pytest_cache/
+.cache/
+.idea/
+.vscode/
+.DS_Store
+
+# Streamlit cloud logs
+.streamlit/config.toml
+.streamlit/credentials.toml
