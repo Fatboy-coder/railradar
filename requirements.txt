@@ -11,5 +11,8 @@ streamlit-folium>=0.12
 gspread>=5.10
 oauth2client>=4.1
 
+# Géolocalisation
+geopy>=2.3
+
 # Gestion du temps
 pytz>=2023.3
