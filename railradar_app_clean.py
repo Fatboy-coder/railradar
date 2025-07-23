@@ -108,8 +108,12 @@ elif menu == "🗺️ Carte des incidents":
         lignes_geojson,
         name="Lignes IDFM",
         style_function=style_ligne,
-        tooltip=folium.GeoJsonTooltip(fields=["nom"], aliases=["Ligne"], sticky=True)
-    ).add_to(m)
+        tooltip=folium.GeoJson(
+    lignes_geojson,
+    name="Lignes IDFM",
+    style_function=style_ligne,
+    tooltip=folium.GeoJsonTooltip(fields=["nom"], aliases=["Ligne"], sticky=True)
+).add_to(m)
 
     # 📍 Marqueurs des incidents
     for row in data:
