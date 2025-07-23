@@ -4,108 +4,93 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import datetime
 import pytz
-import requests
-import time
+import json
 import folium
 from streamlit_folium import st_folium
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
+import time
 
-# -----------------------------
-# CONFIGURATION & AUTH
-# -----------------------------
-st.set_page_config(page_title="RailRadar", page_icon="🚆", layout="wide")
-
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+# -------------------------------
+# AUTHENTIFICATION GOOGLE SHEETS
+# -------------------------------
 service_account_info = st.secrets["google_service_account"]
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
 client = gspread.authorize(creds)
 
-# Feuilles Google Sheets
+# Connexion aux feuilles
 sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").sheet1
-cache_sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").worksheet("cache_geoloc")
+try:
+    cache_sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").worksheet("cache_geoloc")
+except:
+    cache_sheet = client.open_by_key("1uzo113iwwEPQcv3SNSP4e0MvubpPItQANdU0k9zeW6s").add_worksheet(title="cache_geoloc", rows="100", cols="3")
+    cache_sheet.append_row(["lieu", "lat", "lon"])
 
-# -----------------------------
-# FONCTIONS GÉOLOCALISATION
-# -----------------------------
-def read_cache():
-    data = cache_sheet.get_all_records()
-    return {row["nom_lieu"].strip().lower(): (row["latitude"], row["longitude"]) for row in data}
+# -------------------------------------
+# GEOCODING AVEC CACHE LOCAL EN SHEETS
+# -------------------------------------
+def geocode_with_cache(lieu):
+    cache = {row[0]: (row[1], row[2]) for row in cache_sheet.get_all_values()[1:]}
+    if lieu in cache:
+        return cache[lieu]
 
-def append_to_cache(nom_lieu, lat, lon):
-    cache_sheet.append_row([nom_lieu, lat, lon])
+    geolocator = Nominatim(user_agent="railradar")
+    try:
+        location = geolocator.geocode(lieu)
+        if location:
+            cache_sheet.append_row([lieu, location.latitude, location.longitude])
+            return location.latitude, location.longitude
+    except GeocoderTimedOut:
+        time.sleep(1)
+        return geocode_with_cache(lieu)
 
-def get_coordinates(nom_lieu):
-    cache = read_cache()
-    nom_clean = nom_lieu.strip().lower()
+    return None, None
 
-    if nom_clean in cache:
-        return cache[nom_clean]
+# -------------------------------
+# INTERFACE STREAMLIT
+# -------------------------------
+st.set_page_config(page_title="RailRadar", layout="wide")
+st.title("🚆 RailRadar – Signalements collaboratifs")
 
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {"q": nom_lieu, "format": "json", "limit": 1}
-    headers = {"User-Agent": "railradar-bot"}
-    response = requests.get(url, params=params, headers=headers)
-    time.sleep(1)
+menu = st.sidebar.radio("Navigation", ["📩 Signaler", "🗺️ Carte des incidents"])
 
-    if response.status_code == 200 and response.json():
-        lat = float(response.json()[0]["lat"])
-        lon = float(response.json()[0]["lon"])
-        append_to_cache(nom_lieu, lat, lon)
-        return lat, lon
-    else:
-        return None, None
+if menu == "📩 Signaler":
+    st.subheader("Signale un incident ou une anomalie")
+    with st.form("incident_form"):
+        lieu = st.text_input("📍 Gare ou station concernée")
+        type_incident = st.selectbox("🚧 Type d'incident", ["Retard", "Suppression", "Grève", "Travaux", "Fermeture", "Autre"])
+        commentaire = st.text_area("✏️ Commentaire")
+        envoyer = st.form_submit_button("Envoyer")
 
-# -----------------------------
-# INTERFACE PRINCIPALE
-# -----------------------------
-st.title("🚆 RailRadar")
-st.markdown("Signale ou consulte les perturbations ferroviaires en temps réel.")
+        if envoyer and lieu:
+            now = datetime.datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y-%m-%d %H:%M:%S")
+            sheet.append_row([now, lieu, type_incident, commentaire])
+            st.success("✅ Signalement transmis ! Merci 🙌")
 
-with st.form("incident_form"):
-    nom = st.text_input("Ton prénom (optionnel)")
-    ligne = st.text_input("Ligne ou train concerné (ex: RER A, TGV 8471)")
-    lieu = st.text_input("Nom de la gare ou station")
-    incident = st.selectbox("Type d'incident", ["Retard", "Suppression", "Accident", "Autre"])
-    commentaire = st.text_area("Commentaire (facultatif)")
-    submitted = st.form_submit_button("📤 Envoyer")
-
-    if submitted and ligne and lieu and incident:
-        now = datetime.datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y-%m-%d %H:%M:%S")
-        sheet.append_row([nom, ligne, lieu, incident, commentaire, now])
-        st.success("✅ Signalement transmis !")
-
-# -----------------------------
-# VISUALISATION DES DONNÉES
-# -----------------------------
-with st.expander("📄 Voir les signalements récents"):
-    records = sheet.get_all_records()
-    st.write(records)
-
-# -----------------------------
-# CARTE DES INCIDENTS
-# -----------------------------
-if st.sidebar.checkbox("🗺️ Carte des incidents"):
+if menu == "🗺️ Carte des incidents":
     st.subheader("📍 Visualisation géographique des incidents")
     data = sheet.get_all_records()
-    m = folium.Map(
-    location=[48.8566, 2.3522],
-    zoom_start=11,
-    tiles=None
-)
 
-folium.TileLayer(
-    tiles="https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiMTNkZXZsYWIiLCJhIjoiY21kZzQ4Zmp3MGwxOTJscTNiZnIzc2lldyJ9.7P8rf94P_eDORWkrgp_Ftw",
-    attr='Mapbox',
-    name='Mapbox Streets',
-    overlay=True,
-    control=True
-).add_to(m)
+    m = folium.Map(
+        location=[48.8566, 2.3522],
+        zoom_start=11,
+        tiles=None
+    )
+
+    folium.TileLayer(
+        tiles="https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=" + st.secrets["MAPBOX_TOKEN"],
+        attr='Mapbox',
+        name='Mapbox Streets',
+        overlay=True,
+        control=True
+    ).add_to(m)
 
     for row in data:
-        nom_lieu = row.get("lieu") or row.get("gare") or row.get("ville")
-        if nom_lieu:
-            lat, lon = get_coordinates(nom_lieu)
-            if lat and lon:
-                popup = f"<b>{nom_lieu}</b><br>Ligne : {row.get('ligne')}<br>Type : {row.get('incident')}<br>Heure : {row.get('horodatage') or row.get('heure')}<br>Commentaire : {row.get('commentaire', '')}"
-                folium.Marker([lat, lon], popup=popup, icon=folium.Icon(color="red")).add_to(m)
+        lieu = row["lieu"]
+        lat, lon = geocode_with_cache(lieu)
+        if lat and lon:
+            popup = f"<b>{lieu}</b><br>{row['type_incident']}<br>{row['commentaire']}"
+            folium.Marker(location=[lat, lon], popup=popup).add_to(m)
 
-    st_data = st_folium(m, width=700, height=500)
+    st_folium(m, width=1000, height=600)
