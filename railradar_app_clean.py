@@ -86,7 +86,19 @@ with st.expander("📄 Voir les signalements récents"):
 if st.sidebar.checkbox("🗺️ Carte des incidents"):
     st.subheader("📍 Visualisation géographique des incidents")
     data = sheet.get_all_records()
-    m = folium.Map(location=[48.8566, 2.3522], zoom_start=11)
+    m = folium.Map(
+    location=[48.8566, 2.3522],
+    zoom_start=11,
+    tiles=None
+)
+
+folium.TileLayer(
+    tiles="https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=TON_MAPBOX_TOKEN",
+    attr='Mapbox',
+    name='Mapbox Streets',
+    overlay=True,
+    control=True
+).add_to(m)
 
     for row in data:
         nom_lieu = row.get("lieu") or row.get("gare") or row.get("ville")
