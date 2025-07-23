@@ -10,6 +10,25 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 
+import streamlit as st
+
+# Optimisation mobile
+st.set_page_config(
+    page_title="RailRadar",
+    layout="centered",  # ou "wide" selon ton design
+    initial_sidebar_state="collapsed"
+)
+
+# Astuce CSS pour améliorer le rendu sur mobile
+st.markdown("""
+    <style>
+    @media only screen and (max-width: 600px) {
+        .css-1d391kg {padding: 1rem !important;}
+        .css-1v0mbdj {padding-top: 0rem !important;}
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # === CONNEXION AU GOOGLE SHEET ===
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 service_account_info = st.secrets["google_service_account"]
