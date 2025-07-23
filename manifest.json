@@ -1,16 +1,16 @@
 {
-  "name": "RailRadar",
-  "short_name": "RailRadar",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#000b2c",
-  "theme_color": "#32cd32",
-  "description": "Signale ou consulte les perturbations ferroviaires en temps réel.",
-  "icons": [
-    {
-      "src": "https://raw.githubusercontent.com/13devlab/railradar-assets/main/logo-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "RailRadar",
+    "short_name": "RailRadar",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000b2c",
+    "theme_color": "#32cd32",
+    "description": "Signale ou consulte les perturbations ferroviaires en temps r\u00e9el.",
+    "icons": [
+        {
+            "src": "logo-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
 }
