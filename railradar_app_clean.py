@@ -136,16 +136,21 @@ elif menu == "🗺️ Carte des incidents":
         name='Mapbox Streets'
     ).add_to(m)
 
-    folium.GeoJson(
-        lignes_geojson,
-        name="Lignes IDFM",
-        style_function=style_ligne,
-        tooltip=folium.GeoJsonTooltip(
-            fields=["code_ligne"],
-            aliases=["Ligne"],
-            sticky=True
-        )
-    ).add_to(m)
+    def get_geojson_fields(geojson):
+    feature_props = geojson["features"][0].get("properties", {})
+    return [key for key in ["code_ligne", "nom", "mode"] if key in feature_props]
+
+folium.GeoJson(
+    lignes_geojson,
+    name="Lignes IDFM",
+    style_function=style_ligne,
+    tooltip=folium.GeoJsonTooltip(
+        fields=get_geojson_fields(lignes_geojson),
+        aliases=["Ligne", "Nom", "Mode"],
+        sticky=True
+    )
+).add_to(m)
+
 
     for row in data:
         lieu = row.get("lieu")
