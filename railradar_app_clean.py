@@ -109,6 +109,8 @@ elif menu == "🗺️ Carte des incidents":
 
     m = folium.Map(location=[48.8566, 2.3522], zoom_start=11, tiles=None)
 
+    folium.GeoJsonTooltip(fields=["nom"], aliases=["Ligne"])
+
     folium.TileLayer(
         tiles=f"https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{{z}}/{{x}}/{{y}}?access_token={mapbox_token}",
         attr='Mapbox',
