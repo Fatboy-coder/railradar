@@ -4,3 +4,5 @@ pydeck
 gspread
 oauth2client
 pytz
+folium
+streamlit-folium
