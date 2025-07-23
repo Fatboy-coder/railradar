@@ -87,9 +87,6 @@ elif menu == "🗺️ Carte des incidents":
     st.subheader("📍 Visualisation géographique des incidents")
     mapbox_token = st.secrets["MAPBOX_TOKEN"]
     data = sheet.get_all_records()
-    lieu = row.get("lieu")
-type_incident = row.get("type_incident")
-commentaire = row.get("commentaire")
 
     m = folium.Map(location=[48.8566, 2.3522], zoom_start=11, tiles=None)
 
