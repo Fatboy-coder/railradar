@@ -39,8 +39,15 @@ except:
 def geocode_with_cache(lieu):
     cache = {row[0]: (row[1], row[2]) for row in cache_sheet.get_all_values()[1:]}
     if lieu in cache:
-        return float(cache[lieu][0]), float(cache[lieu][1])
+        try:
+            lat = float(cache[lieu][0])
+            lon = float(cache[lieu][1])
+            return lat, lon
+        except ValueError:
+            st.warning(f"⚠️ Coordonnées invalides pour le lieu '{lieu}' dans le cache.")
+            return None, None
 
+    # Géocodage si pas dans le cache
     geolocator = Nominatim(user_agent="railradar")
     try:
         location = geolocator.geocode(lieu)
@@ -80,6 +87,9 @@ elif menu == "🗺️ Carte des incidents":
     st.subheader("📍 Visualisation géographique des incidents")
     mapbox_token = st.secrets["MAPBOX_TOKEN"]
     data = sheet.get_all_records()
+    lieu = row.get("lieu")
+type_incident = row.get("type_incident")
+commentaire = row.get("commentaire")
 
     m = folium.Map(location=[48.8566, 2.3522], zoom_start=11, tiles=None)
 
