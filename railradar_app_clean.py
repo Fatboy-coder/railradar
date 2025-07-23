@@ -10,6 +10,11 @@ from streamlit_folium import st_folium
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 import time
+import json
+
+with open("traces-des-lignes-de-transport-en-commun-idfm", "r", encoding="utf-8") as f:
+    geojson_data = json.load(f)
+
 
 # -------------------------------
 # 🔐 AUTHENTIFICATION GOOGLE SHEETS
