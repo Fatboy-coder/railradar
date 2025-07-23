@@ -108,6 +108,8 @@ if menu == "📩 Signaler":
         st.success(f"La gare la plus proche est **{gare_proche}** ({distance} km)")
 
     with st.form("incident_form"):
+    envoyer = st.form_submit_button("Envoyer")
+
         selected_mode = st.selectbox("🚇 Mode de transport", sorted(gares_par_mode.keys()))
         gare_options = sorted(gares_par_mode[selected_mode])
         lieu = st.selectbox("📍 Gare ou station concernée", gare_options)
@@ -139,11 +141,16 @@ elif menu == "🗺️ Carte des incidents":
     ).add_to(m)
 
     folium.GeoJson(
-        lignes_geojson,
-        name="Lignes IDFM",
-        style_function=style_ligne,
-        tooltip=folium.GeoJsonTooltip(fields=["nom"], aliases=["Ligne"], sticky=True)
-    ).add_to(m)
+    lignes_geojson,
+    name="Lignes IDFM",
+    style_function=style_ligne,
+    tooltip=folium.GeoJsonTooltip(
+        fields=["nom"] if "nom" in lignes_geojson["features"][0]["properties"] else [],
+        aliases=["Ligne"],
+        sticky=True
+    )
+).add_to(m)
+
 
     for row in data:
         lieu = row.get("lieu")
