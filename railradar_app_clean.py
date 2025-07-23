@@ -93,7 +93,7 @@ if st.sidebar.checkbox("🗺️ Carte des incidents"):
 )
 
 folium.TileLayer(
-    tiles="https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=TON_MAPBOX_TOKEN",
+    tiles="https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiMTNkZXZsYWIiLCJhIjoiY21kZzQ4Zmp3MGwxOTJscTNiZnIzc2lldyJ9.7P8rf94P_eDORWkrgp_Ftw",
     attr='Mapbox',
     name='Mapbox Streets',
     overlay=True,
