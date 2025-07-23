@@ -86,7 +86,7 @@ with st.expander("📄 Voir les signalements récents"):
 if st.sidebar.checkbox("🗺️ Carte des incidents"):
     st.subheader("📍 Visualisation géographique des incidents")
     data = sheet.get_all_records()
-    m = folium.Map(location=[48.8566, 2.3522], zoom_start=6)
+    m = folium.Map(location=[48.8566, 2.3522], zoom_start=11)
 
     for row in data:
         nom_lieu = row.get("lieu") or row.get("gare") or row.get("ville")
