@@ -40,6 +40,21 @@ except:
 # -------------------------------------
 # 📍 GEOCODING AVEC CACHE LOCAL EN SHEETS
 # -------------------------------------
+def style_ligne(feature):
+    mode = feature["properties"].get("mode")
+    couleur = {
+        "metro": "#FFCD00",   # Jaune Métro
+        "rer": "#0055A4",     # Bleu RER
+        "tram": "#82C91E",    # Vert Tram
+        "bus": "#E03C31"      # Rouge Bus
+    }.get(mode, "#666666")    # Couleur par défaut
+
+    return {
+        "color": couleur,
+        "weight": 3,
+        "opacity": 0.8
+    }
+
 def geocode_with_cache(lieu):
     cache = {row[0]: (row[1], row[2]) for row in cache_sheet.get_all_values()[1:]}
     if lieu in cache:
