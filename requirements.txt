@@ -1,8 +1,15 @@
-streamlit
-pandas
-pydeck
-gspread
-oauth2client
-pytz
-folium
-streamlit-folium
+# App principale
+streamlit>=1.32
+pandas>=2.0
+
+# Visualisation
+pydeck>=0.8
+folium>=0.15
+streamlit-folium>=0.12
+
+# Connexion Google Sheets
+gspread>=5.10
+oauth2client>=4.1
+
+# Gestion du temps
+pytz>=2023.3
