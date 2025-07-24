@@ -147,7 +147,7 @@ for feat in lignes_geojson["features"]:
     props = feat.get("properties", {})
     for field in ["code_ligne", "nom", "mode"]:
         if field not in props:
-            props[field] = "N/A"
+            props[field] = "N/A"  # On évite les absences
 
 folium.GeoJson(
     lignes_geojson,
