@@ -22,11 +22,11 @@ with open("emplacement-des-gares-idf.geojson", "r", encoding="utf-8") as f:
 gares_par_mode = {}
 gares_coords = {}
 
-for feature in gares_geojson["features"]:
-    nom = feature["properties"].get("nom_long")
-    mode = feature["properties"].get("mode_")
-    lignes = feature["properties"].get("code_ligne")
-    coords = feature["geometry"]["coordinates"][::-1]  # lon, lat -> lat, lon
+for ure in gares_geojson["ures"]:
+    nom = ure["properties"].get("nom_long")
+    mode = ure["properties"].get("mode_")
+    lignes = ure["properties"].get("code_ligne")
+    coords = ure["geometry"]["coordinates"][::-1]  # lon, lat -> lat, lon
     if nom and mode:
         gares_par_mode.setdefault(mode.upper(), []).append(nom)
         gares_coords[nom] = {
@@ -36,8 +36,8 @@ for feature in gares_geojson["features"]:
         }
 
 # 🎨 Stylisation des lignes de transport
-def style_ligne(feature):
-    mode = feature["properties"].get("mode")
+def style_ligne(ure):
+    mode = ure["properties"].get("mode")
     couleur = {
         "metro": "#FFCD00",   # Jaune Métro
         "rer": "#0055A4",     # Bleu RER
@@ -137,11 +137,17 @@ elif menu == "🗺️ Carte des incidents":
     ).add_to(m)
 
     def get_geojson_fields(geojson):
-    if not geojson.get("features"):
+    if not geojson.get("ures"):
         return []
     feature_props = geojson["features"][0].get("properties", {})
     valid_keys = ["code_ligne", "nom", "mode"]
     return [key for key in valid_keys if key in feature_props]
+
+    for feat in lignes_geojson["features"]:
+    props = feat.get("properties", {})
+    for field in ["code_ligne", "nom", "mode"]:
+        if field not in props:
+            props[field] = "N/A"
 
     st.write(lignes_geojson["features"][0]["properties"])
 
