@@ -175,5 +175,8 @@ elif menu == "🗺️ Carte des incidents":
 
     # Légende personnalisée
     legend_html = """
-    <div style='position: fixed; bottom: 50px; left: 50
+<div style='position: fixed; bottom: 50px; left: 50px; ...'>
+  ... your HTML here ...
+</div>
+"""  # <-- Make sure to add this closing triple-quote
     
