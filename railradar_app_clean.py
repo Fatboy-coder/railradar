@@ -1,3 +1,4 @@
+# === IMPORTS DES MODULES ===
 import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -11,22 +12,22 @@ from geopy.distance import geodesic
 import time
 import json
 
-# 📁 Chargement des données IDFM
+# === CHARGEMENT DES FICHIERS GEOJSON IDFM ===
 with open("traces-des-lignes-de-transport-en-commun-idfm.geojson", "r", encoding="utf-8") as f:
     lignes_geojson = json.load(f)
 
 with open("emplacement-des-gares-idf.geojson", "r", encoding="utf-8") as f:
     gares_geojson = json.load(f)
 
-# 🔍 Organisation des gares
+# === ORGANISATION DES DONNÉES DES GARES ===
 gares_par_mode = {}
 gares_coords = {}
 
-for ure in gares_geojson["ures"]:
-    nom = ure["properties"].get("nom_long")
-    mode = ure["properties"].get("mode_")
-    lignes = ure["properties"].get("code_ligne")
-    coords = ure["geometry"]["coordinates"][::-1]  # lon, lat -> lat, lon
+for feature in gares_geojson["features"]:
+    nom = feature["properties"].get("nom_long")
+    mode = feature["properties"].get("mode_")
+    lignes = feature["properties"].get("code_ligne")
+    coords = feature["geometry"]["coordinates"][::-1]
     if nom and mode:
         gares_par_mode.setdefault(mode.upper(), []).append(nom)
         gares_coords[nom] = {
@@ -35,7 +36,7 @@ for ure in gares_geojson["ures"]:
             "coords": coords
         }
 
-# 🎨 Stylisation des lignes de transport
+# === FONCTION DE STYLISATION DES LIGNES ===
 def style_ligne(feature):
     mode = feature["properties"].get("mode")
     couleur = {
@@ -46,7 +47,7 @@ def style_ligne(feature):
     }.get(mode, "#666666")
     return {"color": couleur, "weight": 3, "opacity": 0.8}
 
-# 🔐 Authentification Google Sheets
+# === AUTHENTIFICATION GOOGLE SHEETS ===
 service_account_info = st.secrets["google_service_account"]
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
@@ -61,7 +62,7 @@ except:
     cache_sheet = spreadsheet.add_worksheet(title="cache_geoloc", rows="100", cols="3")
     cache_sheet.append_row(["lieu", "lat", "lon"])
 
-# 📍 Géocodage avec cache
+# === GÉOCODAGE AVEC MÉMORISATION DES COORDONNÉES ===
 def geocode_with_cache(lieu):
     cache = {row[0]: (row[1], row[2]) for row in cache_sheet.get_all_values()[1:]}
     if lieu in cache:
@@ -81,7 +82,7 @@ def geocode_with_cache(lieu):
         return geocode_with_cache(lieu)
     return None, None
 
-# 📍 Détection de la gare la plus proche
+# === DÉTECTION DE LA GARE LA PLUS PROCHE ===
 def plus_proche(lat, lon):
     min_gare, min_dist = None, float("inf")
     for nom, info in gares_coords.items():
@@ -90,11 +91,12 @@ def plus_proche(lat, lon):
             min_gare, min_dist = nom, dist
     return min_gare, round(min_dist, 2)
 
-# 🖼️ Interface Streamlit
+# === INTERFACE STREAMLIT ===
 st.set_page_config(page_title="RailRadar", layout="wide")
 st.title("🚆 RailRadar – Signalements collaboratifs")
 menu = st.sidebar.radio("Navigation", ["📩 Signaler", "🗺️ Carte des incidents"])
 
+# === FORMULAIRE DE SIGNALEMENT ===
 if menu == "📩 Signaler":
     st.subheader("Signale un incident ou une anomalie")
 
@@ -123,6 +125,7 @@ if menu == "📩 Signaler":
             sheet.append_row([now, lieu, type_incident, commentaire])
             st.success("✅ Signalement transmis ! Merci 🙌")
 
+# === CARTE DES INCIDENTS ===
 elif menu == "🗺️ Carte des incidents":
     st.subheader("📍 Visualisation géographique des incidents")
     mapbox_token = st.secrets["MAPBOX_TOKEN"]
@@ -136,30 +139,32 @@ elif menu == "🗺️ Carte des incidents":
         name='Mapbox Streets'
     ).add_to(m)
 
+    # Ajout des champs requis au GeoJSON
     def get_geojson_fields(geojson):
-    if not geojson.get("features"):
-        return []
-    feature_props = geojson["features"][0].get("properties", {})
-    valid_keys = ["code_ligne", "nom", "mode"]
-    return [key for key in valid_keys if key in feature_props]
+        if not geojson.get("features"):
+            return []
+        feature_props = geojson["features"][0].get("properties", {})
+        valid_keys = ["code_ligne", "nom", "mode"]
+        return [key for key in valid_keys if key in feature_props]
 
-for feat in lignes_geojson["features"]:
-    props = feat.get("properties", {})
-    for field in ["code_ligne", "nom", "mode"]:
-        if field not in props:
-            props[field] = "N/A"  # On évite les absences
+    for feat in lignes_geojson["features"]:
+        props = feat.get("properties", {})
+        for field in ["code_ligne", "nom", "mode"]:
+            if field not in props:
+                props[field] = "N/A"
 
-folium.GeoJson(
-    lignes_geojson,
-    name="Lignes IDFM",
-    style_function=style_ligne,
-    tooltip=folium.GeoJsonTooltip(
-        fields=["code_ligne", "nom", "mode"],
-        aliases=["Ligne", "Nom", "Mode"],
-        sticky=True
-    )
-).add_to(m)
+    folium.GeoJson(
+        lignes_geojson,
+        name="Lignes IDFM",
+        style_function=style_ligne,
+        tooltip=folium.GeoJsonTooltip(
+            fields=["code_ligne", "nom", "mode"],
+            aliases=["Ligne", "Nom", "Mode"],
+            sticky=True
+        )
+    ).add_to(m)
 
+    # Ajout des incidents sur la carte
     for row in data:
         lieu = row.get("lieu")
         if lieu:
@@ -168,16 +173,7 @@ folium.GeoJson(
                 popup = f"<b>{lieu}</b><br>{row.get('type_incident','')}<br>{row.get('commentaire','')}"
                 folium.Marker(location=[lat, lon], popup=popup).add_to(m)
 
+    # Légende personnalisée
     legend_html = """
-    <div style='position: fixed; bottom: 50px; left: 50px; background-color: white;
-                border:2px solid grey; padding: 10px; z-index:9999; font-size:14px'>
-      <b>Légende des lignes</b><br>
-      🚇 Métro <span style='color:#FFCD00'>■■■</span><br>
-      🚆 RER <span style='color:#0055A4'>■■■</span><br>
-      🚈 Tram <span style='color:#82C91E'>■■■</span><br>
-      🚌 Bus <span style='color:#E03C31'>■■■</span><br>
-    </div>
-    """
-    m.get_root().html.add_child(folium.Element(legend_html))
-
-    st_folium(m, width=1000, height=600)
+    <div style='position: fixed; bottom: 50px; left: 50
+    
