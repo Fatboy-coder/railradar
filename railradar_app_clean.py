@@ -115,9 +115,10 @@ if menu == "📩 Signaler":
         st.success(f"La gare la plus proche est **{gare_proche}** ({distance} km)")
 
     with st.form("incident_form"):
-        selected_mode = st.selectbox("🚇 Mode de transport", sorted(gares_par_mode.keys()))
-        gare_options = sorted(gares_par_mode[selected_mode])
-        lieu = st.selectbox("📍 Gare ou station concernée", gare_options)
+    selected_mode = st.selectbox("🚇 Mode de transport", sorted(gares_par_mode.keys()))
+    gare_options = sorted(gares_par_mode.get(selected_mode, []))
+    lieu = st.selectbox("📍 Gare ou station concernée", gare_options)
+    # ... le reste du formulaire ...
 
         if lieu in gares_coords:
             lignes = gares_coords[lieu]["lignes"]
