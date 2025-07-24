@@ -11,6 +11,13 @@ from geopy.exc import GeocoderTimedOut
 from geopy.distance import geodesic
 import time
 import json
+import os
+
+geojson_path = "traces-des-lignes-de-transport-en-commun-idfm.geojson"
+if not os.path.exists(geojson_path):
+    st.error(f"Fichier {geojson_path} non trouvé !")
+else:
+    st.success(f"Fichier {geojson_path} trouvé ({os.path.getsize(geojson_path)} octets)")
 
 # === CHARGEMENT DES FICHIERS GEOJSON IDFM ===
 with open("traces-des-lignes-de-transport-en-commun-idfm.geojson", "r", encoding="utf-8") as f:
