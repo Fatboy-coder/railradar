@@ -115,15 +115,22 @@ if menu == "📩 Signaler":
         st.success(f"La gare la plus proche est **{gare_proche}** ({distance} km)")
 
     with st.form("incident_form"):
-    selected_mode = st.selectbox("🚇 Mode de transport", sorted(gares_par_mode.keys()))
-    gare_options = sorted(gares_par_mode.get(selected_mode, []))
-    lieu = st.selectbox("📍 Gare ou station concernée", gare_options)
-    # ... autres champs du formulaire ...
-    envoyer = st.form_submit_button("Envoyer")
-    if envoyer and lieu:
-        now = datetime.datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y-%m-%d %H:%M:%S")
-        sheet.append_row([now, lieu, type_incident, commentaire])
-        st.success("✅ Signalement transmis ! Merci 🙌")
+        selected_mode = st.selectbox("🚇 Mode de transport", sorted(gares_par_mode.keys()))
+        gare_options = sorted(gares_par_mode.get(selected_mode, []))
+        lieu = st.selectbox("📍 Gare ou station concernée", gare_options)
+
+        if lieu in gares_coords:
+            lignes = gares_coords[lieu]["lignes"]
+            st.markdown(f"**Correspondance(s)** : {lignes}")
+
+        type_incident = st.selectbox("🚧 Type d'incident", ["Retard", "Suppression", "Grève", "Travaux", "Fermeture", "Autre"])
+        commentaire = st.text_area("✏️ Commentaire")
+        envoyer = st.form_submit_button("Envoyer")
+
+        if envoyer and lieu:
+            now = datetime.datetime.now(pytz.timezone("Europe/Paris")).strftime("%Y-%m-%d %H:%M:%S")
+            sheet.append_row([now, lieu, type_incident, commentaire])
+            st.success("✅ Signalement transmis ! Merci 🙌")
 
 # === CARTE DES INCIDENTS ===
 elif menu == "🗺️ Carte des incidents":
@@ -179,4 +186,6 @@ elif menu == "🗺️ Carte des incidents":
   ... your HTML here ...
 </div>
 """  # <-- Make sure to add this closing triple-quote
-    
+
+    # Affichage de la carte dans Streamlit
+    st_folium(m, width=1200)
