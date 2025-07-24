@@ -36,13 +36,13 @@ for ure in gares_geojson["ures"]:
         }
 
 # 🎨 Stylisation des lignes de transport
-def style_ligne(ure):
-    mode = ure["properties"].get("mode")
+def style_ligne(feature):
+    mode = feature["properties"].get("mode")
     couleur = {
-        "metro": "#FFCD00",   # Jaune Métro
-        "rer": "#0055A4",     # Bleu RER
-        "tram": "#82C91E",    # Vert Tram
-        "bus": "#E03C31"      # Rouge Bus
+        "metro": "#FFCD00",
+        "rer": "#0055A4",
+        "tram": "#82C91E",
+        "bus": "#E03C31"
     }.get(mode, "#666666")
     return {"color": couleur, "weight": 3, "opacity": 0.8}
 
@@ -137,19 +137,17 @@ elif menu == "🗺️ Carte des incidents":
     ).add_to(m)
 
     def get_geojson_fields(geojson):
-    if not geojson.get("ures"):
+    if not geojson.get("features"):
         return []
     feature_props = geojson["features"][0].get("properties", {})
     valid_keys = ["code_ligne", "nom", "mode"]
     return [key for key in valid_keys if key in feature_props]
 
-    for feat in lignes_geojson["features"]:
+for feat in lignes_geojson["features"]:
     props = feat.get("properties", {})
     for field in ["code_ligne", "nom", "mode"]:
         if field not in props:
             props[field] = "N/A"
-
-    st.write(lignes_geojson["features"][0]["properties"])
 
 folium.GeoJson(
     lignes_geojson,
@@ -161,7 +159,6 @@ folium.GeoJson(
         sticky=True
     )
 ).add_to(m)
-
 
     for row in data:
         lieu = row.get("lieu")
